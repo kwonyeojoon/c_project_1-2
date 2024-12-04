@@ -1,3 +1,5 @@
-flask
 numpy
 pandas
+Flask==2.0.3
+python-dotenv==0.19.2
+Werkzeug==2.0.3
