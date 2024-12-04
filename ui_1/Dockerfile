@@ -1,11 +1,10 @@
-# 베이스 이미지로 Python 3.10-slim 사용..
+# 베이스 이미지로 Python 3.10-slim 사용
 FROM python:3.10-slim
 
 # 패키지 설치 및 업데이트
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        gcc \
-        make \
+        build-essential \  # C 컴파일러 및 필수 개발 도구 설치
         curl \
         git \
         libcurl4-openssl-dev \
