@@ -1,5 +1,3 @@
-# Dockerfile (ui_1 디렉토리 내에서 빌드 시)
-
 # 베이스 이미지로 Python 3.10-slim 사용
 FROM python:3.10-slim
 
@@ -26,14 +24,14 @@ RUN find / -name "cJSON.h"
 # 작업 디렉토리 설정
 WORKDIR /app
 
-# 현재 디렉토리의 모든 내용을 /app으로 복사
-COPY . /app/
+# ui_1 폴더의 내용을 /app 디렉토리로 복사
+COPY ./ui_1 /app/
 
 # /app/ui_1 디렉토리로 이동
 WORKDIR /app/ui_1
 
 # requirements.txt를 현재 디렉토리로 복사
-COPY requirements.txt ./requirements.txt
+COPY ./requirements.txt ./requirements.txt
 
 # 필요한 Python 패키지 설치
 RUN pip install --no-cache-dir -r requirements.txt
