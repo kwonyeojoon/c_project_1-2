@@ -1,1 +1,3 @@
-"flask\nnumpy\npandas" 
+flask
+numpy
+pandas
