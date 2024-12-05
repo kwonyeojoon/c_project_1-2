@@ -28,5 +28,5 @@ COPY . /app/
 # Python 패키지 설치
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Flask 앱 실행
-CMD ["python", "app.py"]
+# 프로덕션용 WSGI 서버로 Gunicorn 사용
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
