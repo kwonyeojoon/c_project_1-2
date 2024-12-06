@@ -36,6 +36,7 @@
             </div>
             <!-- 달력 -->
             <div id="calendar" class="calendar"></div>
+
             <!-- 교통 정보 -->
             <div class="traffic-info">
                 <h3>교통 정보</h3>
@@ -54,7 +55,6 @@
                     <div class="input-row">
                         <label for="departure-time">출발 시간</label>
                         <input type="time" id="departure-time" step="600">
-
                     </div>
                     <!-- 대중교통/자가용 선택 -->
                     <div class="transport-options">
@@ -62,8 +62,6 @@
                         <label><input type="checkbox" id="private-vehicle"> 자가용</label>
                         <!-- 검색 버튼 -->
                         <button type="button" class="search-button" onclick="searchRoute()">검색</button>
-                        <!-- 타임라인에 추가 버튼 -->
-                        <button type="button" class="plus-button" onclick="plusTimeblock()">추가</button>
                     </div>
                 </form>
                 <!-- 최단 시간 결과 -->
@@ -78,111 +76,27 @@
         <div class="main-timeline">
             <!-- 오전 타임라인 -->
             <div id="timeline-am" class="timeline">
+                {% for hour in range(0, 12) %}
                 <div class="time-row">
-                    <div class="time-label">00:00</div>
+                    <div class="time-label">{{ "%02d:00"|format(hour) }}</div>
                     <div class="timeline-content"></div>
                 </div>
-                <div class="time-row">
-                    <div class="time-label">01:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">02:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">03:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">04:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">05:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">06:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">07:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">08:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">09:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">10:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">11:00</div>
-                    <div class="timeline-content"></div>
-                </div>
+                {% endfor %}
             </div>
 
             <!-- 오후 타임라인 -->
             <div id="timeline-pm" class="timeline">
+                {% for hour in range(12, 24) %}
                 <div class="time-row">
-                    <div class="time-label">12:00</div>
+                    <div class="time-label">{{ "%02d:00"|format(hour) }}</div>
                     <div class="timeline-content"></div>
                 </div>
-                <div class="time-row">
-                    <div class="time-label">13:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">14:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">15:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">16:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">17:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">18:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">19:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">20:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">21:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">22:00</div>
-                    <div class="timeline-content"></div>
-                </div>
-                <div class="time-row">
-                    <div class="time-label">23:00</div>
-                    <div class="timeline-content"></div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
 
-    </script>
+    <!-- 스크립트 파일 포함 -->
     <script src="/static/cal_scripts.js"></script>
 </body>
 </html>
