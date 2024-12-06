@@ -1,4 +1,4 @@
-# 베이스 이미지로 Python 3.10-slim 사용
+# 베이스 이미지로 Python 3.10-slim 사용..
 FROM python:3.10-slim
 
 # C 컴파일러 및 필수 개발 도구 설치
