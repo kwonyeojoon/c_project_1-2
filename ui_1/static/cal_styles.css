@@ -19,6 +19,91 @@ body, html {
     color: #ce9997;
 }
 
+.input-row2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-row2 label {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.input-row2 input[type="text"], .input-row2 input[type="time"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    flex: 1;
+}
+
+.transport-options2 {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.search-button2 {
+    background-color: #ce9997;
+    color: white;
+    font-size: 14px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-button:hover2 {
+    background-color: #b47e7c;
+}
+
+.plus-button2 {
+    background-color: #86a4bf;
+    color: white;
+    font-size: 14px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.plus-button:hover2 {
+    background-color: #708aa0;
+}
+
+#shortest-time2 {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+#minimum-time2 {
+    border: none;
+    font-size: 14px;
+    background: #f9f9f9;
+    color: #47403b;
+}
+
+#close-transport-button {
+    position: absolute; /* 부모 요소 기준으로 위치 지정 */
+    left: 0; /* 부모 요소의 왼쪽 끝으로 배치 */
+    bottom: 0; /* 부모 요소의 아래쪽 끝으로 배치 */
+    padding: 10px 20px; /* 버튼 크기 */
+    font-size: 14px; /* 글씨 크기 */
+    border: none; /* 테두리 제거 */
+    border-radius: 4px; /* 둥근 모서리 */
+    background-color: #e0e0e0; /* 버튼 배경색 */
+    color: #47403b; /* 텍스트 색상 */
+    cursor: pointer; /* 마우스 포인터 변경 */
+    transition: opacity 0.3s ease; /* 마우스 호버 시 효과 */
+}
+
+#close-transport-button:hover {
+    opacity: 0.8; /* 마우스 호버 시 투명도 변경 */
+}
+
 .week-container {
     display: flex;
     align-items: center;
