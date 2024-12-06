@@ -1,4 +1,4 @@
-# 베이스 이미지로 Python 3.10-slim 사용..
+# 베이스 이미지로 Python 3.10-slim 사용
 FROM python:3.10-slim
 
 # C 컴파일러 및 필수 개발 도구 설치
@@ -9,6 +9,7 @@ RUN apt-get update && \
         git \
         libcurl4-openssl-dev \
         libcjson-dev \
+        pkg-config \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -29,8 +30,8 @@ COPY . /app/
 RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir -r requirements.txt
 
-# Gunicorn 설치 확인 (선택 사항)
-RUN gunicorn --version
+# Gunicorn 설치 확인
+RUN pip show gunicorn && which gunicorn
 
 # 프로덕션용 WSGI 서버로 Gunicorn 사용 (python -m gunicorn으로 변경)
 CMD ["python", "-m", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
