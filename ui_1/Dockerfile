@@ -28,5 +28,5 @@ RUN python -m pip install --upgrade pip && python -m pip install --no-cache-dir 
 # gunicorn 설치 확인용 (디버깅)
 RUN python -m pip show gunicorn && gunicorn --version && which gunicorn || (echo "Gunicorn not found" && exit 1)
 
-# CMD를 python 모듈 형태로 실행
-CMD ["python", "-m", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+# 수정된 CMD 라인 (Shell form)
+CMD python -m gunicorn -w 4 -b 0.0.0.0:$PORT app:app
