@@ -20,6 +20,7 @@ RUN git clone https://github.com/DaveGamble/cJSON.git /cJSON && \
 
 WORKDIR /app
 
+# 로컬의 현재 디렉토리 모든 파일을 컨테이너의 /app으로 복사
 COPY . /app/
 
 # pip 업그레이드 및 Python 패키지 설치
@@ -27,9 +28,9 @@ RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir -r requirements.txt
 
 # C 프로그램에 실행 권한 부여
-RUN chmod +x /app/db_manager/db_manager \
-    /app/transit/get_coordinates \
-    /app/db_manager/get_route_info
+RUN chmod +x /app/ui_1/db_manager && \
+    chmod +x /app/ui_1/transit/get_coordinates && \
+    chmod +x /app/ui_1/transit/get_route_info
 
 # 포트 설정
 EXPOSE $PORT
