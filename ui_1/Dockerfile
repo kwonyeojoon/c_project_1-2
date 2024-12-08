@@ -36,9 +36,9 @@ RUN cd ui_1/db_manager && make && \
     cd ../transit && make
 
 # 또는, Makefile이 없고 직접 컴파일하는 경우:
-# RUN gcc -o ui_1/db_manager/db_manager ui_1/db_manager/db_manager.c && \
-#     gcc -o ui_1/transit/get_coordinates ui_1/transit/get_coordinates.c && \
-#     gcc -o ui_1/transit/get_route_info ui_1/transit/get_route_info.c
+# RUN gcc -o /app/ui_1/db_manager/db_manager /app/ui_1/db_manager/db_manager.c && \
+#     gcc -o /app/ui_1/transit/get_coordinates /app/ui_1/transit/get_coordinates.c && \
+#     gcc -o /app/ui_1/transit/get_route_info /app/ui_1/transit/get_route_info.c
 
 # C 프로그램에 실행 권한 부여 및 권한 확인
 RUN chmod +x /app/ui_1/db_manager/db_manager \
