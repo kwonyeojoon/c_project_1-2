@@ -12,13 +12,6 @@ RUN apt-get update && \
         pkg-config \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# cJSON 빌드 및 설치 (필요 시)
-RUN git clone https://github.com/DaveGamble/cJSON.git /cJSON && \
-    cd /cJSON && \
-    make && \
-    make install && \
-    rm -rf /cJSON
-
 # 작업 디렉토리 설정
 WORKDIR /app
 
@@ -33,24 +26,21 @@ RUN python -m pip install --upgrade pip && \
 COPY . /app/
 
 # C 프로그램 빌드
-# Makefile이 있는 경우
-RUN cd ui_1/db_manager && make && \
-    cd ../transit && make
+# db_manager 빌드
+RUN cd ui_1/db_manager && make
 
-# 또는, Makefile이 없고 직접 컴파일하는 경우:
-# RUN gcc -o /app/ui_1/db_manager/db_manager /app/ui_1/db_manager/db_manager.c && \
-#     gcc -o /app/ui_1/transit/get_coordinates /app/ui_1/transit/get_coordinates.c && \
-#     gcc -o /app/ui_1/transit/get_route_info /app/ui_1/transit/get_route_info.c
+# transit 빌드
+RUN cd ui_1/transit && make
 
 # C 프로그램에 실행 권한 부여 및 권한 확인
-RUN chmod +x /app/ui_1/db_manager/db_manager \
-    /app/ui_1/transit/get_coordinates \
-    /app/ui_1/transit/get_route_info && \
-    ls -l /app/ui_1/db_manager/db_manager && \
-    ls -l /app/ui_1/transit/get_coordinates && \
-    ls -l /app/ui_1/transit/get_route_info
+RUN chmod +x ui_1/db_manager/db_manager \
+    ui_1/transit/get_coordinates \
+    ui_1/transit/get_route_info && \
+    ls -l ui_1/db_manager/db_manager && \
+    ls -l ui_1/transit/get_coordinates && \
+    ls -l ui_1/transit/get_route_info
 
-# 포트 설정
+# 포트 설정 (Render는 PORT 환경 변수를 자동으로 설정하므로 이를 사용)
 EXPOSE $PORT
 
 # CMD 설정: Exec form 사용
