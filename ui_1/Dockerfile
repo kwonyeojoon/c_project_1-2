@@ -1,3 +1,4 @@
+# 베이스 이미지 설정
 FROM python:3.10-slim
 
 # 필수 패키지 설치
@@ -11,13 +12,14 @@ RUN apt-get update && \
         pkg-config \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# cJSON 빌드 및 설치
+# cJSON 빌드 및 설치 (필요 시)
 RUN git clone https://github.com/DaveGamble/cJSON.git /cJSON && \
     cd /cJSON && \
     make && \
     make install && \
     rm -rf /cJSON
 
+# 작업 디렉토리 설정
 WORKDIR /app
 
 # requirements.txt 먼저 복사하여 캐싱 활용
@@ -30,7 +32,8 @@ RUN python -m pip install --upgrade pip && \
 # 나머지 애플리케이션 파일 복사
 COPY . /app/
 
-# C 프로그램 빌드 (필요 시)
+# C 프로그램 빌드
+# Makefile이 있는 경우
 RUN cd ui_1/db_manager && make && \
     cd ../transit && make
 
