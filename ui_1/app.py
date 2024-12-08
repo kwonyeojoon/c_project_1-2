@@ -19,8 +19,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')  # 환경 변수로 SECRET_KEY 설정
 
 # 프로젝트 루트 디렉토리 설정
-current_directory = os.getcwd()
-PROJECT_ROOT = current_directory
+PROJECT_ROOT = os.getcwd()
 TRANSIT_DIR = os.path.join(PROJECT_ROOT, "ui_1", "transit")
 DB_DIR = os.path.join(PROJECT_ROOT, "ui_1", "db_manager")
 
@@ -248,7 +247,7 @@ def get_coordinates(departure, destination):
 def get_transit_time(start_coords, end_coords, hour, minute):
     try:
         logging.info(f"get_transit_time 실행: start_coords='{start_coords}', end_coords='{end_coords}', hour='{hour}', minute='{minute}'")
-        result = subprocess.check_output(['python3', 'get_transit_time.py', start_coords, end_coords, hour, minute], text=True)
+        result = subprocess.check_output(['python3', 'ui_1/transit/get_transit_time.py', start_coords, end_coords, hour, minute], text=True)
         logging.info(f"get_transit_time 결과: '{result.strip()}'")
         return {'success': True, 'time': result.strip()}
     except subprocess.CalledProcessError as e:
@@ -259,7 +258,7 @@ def get_transit_time(start_coords, end_coords, hour, minute):
 def get_car_duration(start_coords, end_coords):
     try:
         logging.info(f"get_car_duration 실행: start_coords='{start_coords}', end_coords='{end_coords}'")
-        result = subprocess.check_output(['./get_route_info', start_coords, end_coords], text=True)
+        result = subprocess.check_output(['./ui_1/transit/get_route_info', start_coords, end_coords], text=True)
         logging.info(f"get_car_duration 결과: '{result.strip()}'")
         return {'success': True, 'time': result.strip()}
     except subprocess.CalledProcessError as e:
@@ -301,6 +300,31 @@ def get_route_time():
             return jsonify({'success': True, 'time': car_result['time']})
         logging.error(f"get_car_duration 실패: {car_result['error']}")
         return jsonify({'success': False, 'error': car_result['error']})
+
+# 진단용 라우트 추가
+@app.route('/diagnose')
+def diagnose():
+    diagnostics = {}
+    diagnostics['db_manager_exists'] = os.path.isfile(db_manager_path)
+    diagnostics['db_manager_executable'] = os.access(db_manager_path, os.X_OK) if diagnostics['db_manager_exists'] else False
+    diagnostics['get_coordinates_exists'] = os.path.isfile(get_coordinates_path)
+    diagnostics['get_coordinates_executable'] = os.access(get_coordinates_path, os.X_OK) if diagnostics['get_coordinates_exists'] else False
+    diagnostics['get_route_info_exists'] = os.path.isfile(get_route_info_path)
+    diagnostics['get_route_info_executable'] = os.access(get_route_info_path, os.X_OK) if diagnostics['get_route_info_exists'] else False
+    
+    try:
+        # 파일 권한 및 소유자 정보 확인
+        db_manager_info = subprocess.check_output(['ls', '-l', db_manager_path], text=True).strip() if diagnostics['db_manager_exists'] else 'Not Found'
+        get_coordinates_info = subprocess.check_output(['ls', '-l', get_coordinates_path], text=True).strip() if diagnostics['get_coordinates_exists'] else 'Not Found'
+        get_route_info_info = subprocess.check_output(['ls', '-l', get_route_info_path], text=True).strip() if diagnostics['get_route_info_exists'] else 'Not Found'
+        
+        diagnostics['db_manager_info'] = db_manager_info
+        diagnostics['get_coordinates_info'] = get_coordinates_info
+        diagnostics['get_route_info_info'] = get_route_info_info
+    except Exception as e:
+        diagnostics['error'] = str(e)
+    
+    return jsonify(diagnostics)
 
 # 애플리케이션 실행
 if __name__ == '__main__':
