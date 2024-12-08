@@ -17,7 +17,7 @@ logging.basicConfig(
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'your_secret_key')  # 환경 변수로 SECRET_KEY 설정
+app.secret_key = os.environ.get('SECRET_KEY', 'your_super_secret_key')  # 환경 변수로 SECRET_KEY 설정
 
 # 현재 작업 디렉토리 설정
 PROJECT_ROOT = os.getcwd()
@@ -32,6 +32,12 @@ get_route_info_path = os.path.abspath(os.path.join(TRANSIT_DIR, "get_route_info"
 logging.info(f"C 프로그램 경로 설정: db_manager_path='{db_manager_path}'")
 logging.info(f"C 프로그램 경로 설정: get_coordinates_path='{get_coordinates_path}'")
 logging.info(f"C 프로그램 경로 설정: get_route_info_path='{get_route_info_path}'")
+
+# 추가 라우트: /ping
+@app.route('/ping')
+def ping():
+    logging.info("Ping 라우트에 접속하였습니다.")
+    return jsonify({'status': 'success', 'message': 'Pong!'})
 
 # 홈 페이지 라우트
 @app.route('/')
