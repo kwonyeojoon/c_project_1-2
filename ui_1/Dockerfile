@@ -31,7 +31,6 @@ RUN python -m pip install --upgrade pip && \
 COPY . /app/
 
 # C 프로그램 빌드 (필요 시)
-# 예시: Makefile이 있는 경우
 RUN cd ui_1/db_manager && make && \
     cd ../transit && make
 
