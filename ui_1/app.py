@@ -4,7 +4,7 @@ import subprocess
 import os
 import logging
 
-# 로깅 설정
+# 📝 로깅 설정
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s:%(message)s',
@@ -58,7 +58,7 @@ def register():
             logging.error(f"C 바이너리에 실행 권한이 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 권한이 없습니다.'}), 500
 
-        # C 프로그램 실행 전 상태 로그 (비밀번호는 마스킹)
+        # C 프로그램 실행 준비 로그 (비밀번호는 마스킹)
         logging.info(f"C 프로그램 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='******'")
 
         # C 프로그램 실행
@@ -96,7 +96,7 @@ def login():
             logging.error(f"C 바이너리에 실행 권한이 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 권한이 없습니다.'}), 500
 
-        # C 프로그램 실행 전 상태 로그 (비밀번호는 마스킹)
+        # C 프로그램 실행 준비 로그 (비밀번호는 마스킹)
         logging.info(f"C 프로그램 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='******'")
 
         # C 프로그램 실행
@@ -206,7 +206,7 @@ def load_timeline():
                         if len(fields) == 3:
                             title, start_time, end_time = fields
                             is_transit = "이동시간" in title  # 이동시간 여부 확인
-                            events.append({'title': title, 'start_time': start_time, 'end_time': end_time, 'is_transit':is_transit})
+                            events.append({'title': title, 'start_time': start_time, 'end_time': end_time, 'is_transit': is_transit})
                 logging.info(f"로드된 이벤트 수: {len(events)}")
                 return jsonify({'status': 'success', 'events': events})
             else:
@@ -303,7 +303,7 @@ def get_route_time():
         if car_result['success']:
             return jsonify({'success': True, 'time': car_result['time']})
         logging.error(f"get_car_duration 실패: {car_result['error']}")
-        return jsonify({'success': False, 'error': car_result['error']})
+        return jsonify({'success': False, 'error': car_result['error']})    
 
 # 진단용 라우트 추가: 바이너리 존재 여부 및 권한 확인
 @app.route('/diagnose')
@@ -335,4 +335,4 @@ def diagnose():
 # 애플리케이션 실행
 if __name__ == '__main__':
     logging.info("Flask 애플리케이션 시작")
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))  # Render에서 설정한 PORT 사용
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))  # Render에서 설정한 PORT 사용
