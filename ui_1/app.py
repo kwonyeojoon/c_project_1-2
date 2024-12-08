@@ -1,41 +1,47 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from dotenv import load_dotenv
 import subprocess
-import os
+import logging
+
+# 로깅 설정
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
-
-# 동적 라이브러리 경로 설정 (Linux 환경에서는 필요하지 않을 수 있습니다)
-# os.environ['DYLD_LIBRARY_PATH'] = '/opt/homebrew/lib:' + os.environ.get('DYLD_LIBRARY_PATH', '')
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')  # 환경 변수로 SECRET_KEY 설정
 
 current_directory = os.getcwd()
 PROJECT_ROOT = current_directory
-TRANSIT_DIR = os.path.join(PROJECT_ROOT, "transit")
-DB_DIR = os.path.join(PROJECT_ROOT, "db_manager", "db_manager")
+TRANSIT_DIR = os.path.join(PROJECT_ROOT, "ui_1", "transit")
+DB_DIR = os.path.join(PROJECT_ROOT, "ui_1", "db_manager")
 
-# 홈 페이지 라우트: 조원이 만든 login.html(로그인 페이지)와 연결하는 코드
+# 홈 페이지 라우트
 @app.route('/')
 def home():
     return render_template('login.html')
 
 # C 프로그램 경로 설정
-db_manager_path = os.path.abspath(DB_DIR)
+db_manager_path = os.path.abspath(os.path.join(DB_DIR, "db_manager"))
 
 # 회원가입 처리 라우트
 @app.route('/register', methods=['POST'])
 def register():
-    # 클라이언트에서 전달된 JSON 데이터를 가져옴
     data = request.get_json()
     username = data['username'].strip()
     password = data['password'].strip()
+    logging.info(f"Register attempt for user: {username}")
 
     try:
         result = subprocess.check_output([db_manager_path, 'register', username, password], text=True).strip()
-        return jsonify({'status': 'success', 'message': '회원가입이 완료되었습니다!'}) if result == 'success' else jsonify({'status': 'fail', 'message': '이미 존재하는 아이디입니다.'})
+        logging.info(f"Register result: {result}")
+        if result == 'success':
+            return jsonify({'status': 'success', 'message': '회원가입이 완료되었습니다!'})
+        else:
+            return jsonify({'status': 'fail', 'message': '이미 존재하는 아이디입니다.'})
     except subprocess.CalledProcessError as e:
+        logging.error(f"Register subprocess error: {e.output}")
         return jsonify({'status': 'fail', 'message': f'회원가입 중 오류가 발생했습니다: {e.output}'})
 
 # 로그인 처리 라우트
@@ -44,15 +50,18 @@ def login():
     data = request.get_json()
     username = data['username'].strip()
     password = data['password'].strip()
+    logging.info(f"Login attempt for user: {username}")
 
     try:
         result = subprocess.check_output([db_manager_path, 'login', username, password], text=True).strip()
+        logging.info(f"Login result: {result}")
         if result == 'success':
-            session['username'] = username  # 세션에 사용자 이름 저장
-            return jsonify({'status': 'success', 'redirect': url_for('calendar')})  # 수정된 부분
+            session['username'] = username
+            return jsonify({'status': 'success', 'redirect': url_for('calendar')})
         else:
             return jsonify({'status': 'fail', 'message': '아이디 또는 비밀번호가 잘못되었습니다.'})
     except subprocess.CalledProcessError as e:
+        logging.error(f"Login subprocess error: {e.output}")
         return jsonify({'status': 'fail', 'message': f'로그인 중 오류가 발생했습니다: {e.output}'})
 
 # 달력 페이지 라우트
@@ -79,7 +88,7 @@ def save_timeline():
     end_time = str(data.get('endTime', ''))
     trans_time = str(data.get('transTime', ''))
 
-    print(trans_time)
+    logging.info(f"Saving timeline event: {title} on {date}")
 
     try:
         cmd = [
@@ -99,7 +108,7 @@ def save_timeline():
             text=True,
         )
 
-        print(result)
+        logging.info(f"Save event result: {result}")
 
         if result.returncode == 0 and result.stdout.strip() == 'success':
             return jsonify({'status': 'success'})
@@ -107,6 +116,7 @@ def save_timeline():
             error_output = result.stderr.strip() or result.stdout.strip()
             return jsonify({'status': 'fail', 'message': f'이벤트 저장에 실패했습니다: {error_output}'})
     except Exception as e:
+        logging.error(f"Save timeline exception: {str(e)}")
         return jsonify({'status': 'fail', 'message': f'이벤트 저장 중 오류가 발생했습니다: {str(e)}'})
 
 # 타임라인 이벤트 로드 라우트
@@ -119,9 +129,13 @@ def load_timeline():
     data = request.get_json()
     date = str(data.get('sDate', ''))
 
+    logging.info(f"Loading timeline events for user: {username} on {date}")
+
     try:
         cmd = [db_manager_path, 'load_events', username, date]
         result = subprocess.run(cmd, capture_output=True, text=True)
+
+        logging.info(f"Load events result: {result}")
 
         if result.returncode == 0:
             output = result.stdout.strip()
@@ -133,7 +147,7 @@ def load_timeline():
                         fields = line.strip().split(';')
                         if len(fields) == 3:
                             title, start_time, end_time = fields
-                            is_transit = "이동시간" in title  # 이동시간 여부 확인
+                            is_transit = "이동시간" in title
                             events.append({'title': title, 'start_time': start_time, 'end_time': end_time, 'is_transit': is_transit})
                 return jsonify({'status': 'success', 'events': events})
             else:
@@ -142,6 +156,7 @@ def load_timeline():
             error_output = result.stderr.strip() or result.stdout.strip()
             return jsonify({'status': 'fail', 'message': f'이벤트 로드에 실패했습니다: {error_output}'})
     except Exception as e:
+        logging.error(f"Load timeline exception: {str(e)}")
         return jsonify({'status': 'fail', 'message': f'이벤트 로드 중 오류가 발생했습니다: {str(e)}'})
 
 def get_coordinates(departure, destination):
@@ -205,4 +220,4 @@ def get_route_time():
 
 # 애플리케이션 실행
 if __name__ == '__main__':
-    app.run(debug=True)  # 개발용 서버 실행
+    app.run(debug=False)  # 프로덕션 환경에서는 debug=False
