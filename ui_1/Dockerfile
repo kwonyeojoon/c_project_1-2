@@ -11,7 +11,7 @@ RUN apt-get update && \
         pkg-config \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# cJSON 빌드
+# cJSON 빌드 및 설치
 RUN git clone https://github.com/DaveGamble/cJSON.git /cJSON && \
     cd /cJSON && \
     make && \
@@ -22,11 +22,17 @@ WORKDIR /app
 
 COPY . /app/
 
-# pip 업그레이드 및 패키지 설치
-RUN python -m pip install --upgrade pip && python -m pip install --no-cache-dir -r requirements.txt
+# pip 업그레이드 및 Python 패키지 설치
+RUN python -m pip install --upgrade pip && \
+    python -m pip install --no-cache-dir -r requirements.txt
 
-# gunicorn 설치 확인용 (디버깅)
-RUN python -m pip show gunicorn && gunicorn --version && which gunicorn || (echo "Gunicorn not found" && exit 1)
+# C 프로그램에 실행 권한 부여
+RUN chmod +x /app/db_manager/db_manager \
+    /app/transit/get_coordinates \
+    /app/db_manager/get_route_info
 
-# 수정된 CMD 라인 (Shell form)
-CMD python -m gunicorn -w 4 -b 0.0.0.0:$PORT app:app
+# 포트 설정
+EXPOSE $PORT
+
+# CMD 설정: Exec form 사용
+CMD ["python", "-m", "gunicorn", "-w", "4", "-b", "0.0.0.0:$PORT", "app:app"]
