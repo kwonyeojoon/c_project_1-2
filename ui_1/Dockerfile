@@ -20,16 +20,25 @@ RUN git clone https://github.com/DaveGamble/cJSON.git /cJSON && \
 
 WORKDIR /app
 
-# 로컬의 현재 디렉토리 모든 파일을 컨테이너의 /app으로 복사
-COPY . /app/
+# requirements.txt 먼저 복사하여 캐싱 활용
+COPY requirements.txt /app/
 
 # pip 업그레이드 및 Python 패키지 설치
 RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir -r requirements.txt
 
+# 나머지 애플리케이션 파일 복사
+COPY . /app/
+
 # C 프로그램 빌드 (필요 시)
+# 예시: Makefile이 있는 경우
 RUN cd ui_1/db_manager && make && \
     cd ../transit && make
+
+# 또는, Makefile이 없고 직접 컴파일하는 경우:
+# RUN gcc -o ui_1/db_manager/db_manager ui_1/db_manager/db_manager.c && \
+#     gcc -o ui_1/transit/get_coordinates ui_1/transit/get_coordinates.c && \
+#     gcc -o ui_1/transit/get_route_info ui_1/transit/get_route_info.c
 
 # C 프로그램에 실행 권한 부여 및 권한 확인
 RUN chmod +x /app/ui_1/db_manager/db_manager \
