@@ -29,10 +29,18 @@ COPY . /app/
 RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir -r requirements.txt
 
-# C 바이너리에 실행 권한 부여
-RUN chmod +x /app/db_manager/db_manager && \
-    chmod +x /app/transit/get_coordinates && \
-    chmod +x /app/transit/get_route_info
+# C 바이너리 컴파일
+# db_manager 컴파일
+RUN cd db_manager && \
+    gcc -o db_manager db_manager.c
+
+# transit 프로그램 컴파일
+RUN cd transit && \
+    gcc -o get_coordinates get_coordinates.c && \
+    gcc -o get_route_info get_route_info.c
+
+# 실행 권한 부여
+RUN chmod +x db_manager/db_manager transit/get_coordinates transit/get_route_info
 
 # CMD를 gunicorn 실행 명령어로 설정
 CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
