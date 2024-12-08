@@ -42,11 +42,14 @@ def register():
         if not os.path.isfile(db_manager_path):
             logging.error(f"C 바이너리 파일을 찾을 수 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 파일을 찾을 수 없습니다.'}), 500
-        
+
         # C 바이너리 파일 실행 권한 확인
         if not os.access(db_manager_path, os.X_OK):
             logging.error(f"C 바이너리에 실행 권한이 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 권한이 없습니다.'}), 500
+
+        # C 프로그램 실행 전 환경 변수 확인
+        logging.info(f"C 바이너리 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='{password}'")
 
         # C 프로그램 실행
         result = subprocess.check_output([db_manager_path, 'register', username, password], text=True).strip()
@@ -56,7 +59,7 @@ def register():
             return jsonify({'status': 'success', 'message': '회원가입이 완료되었습니다!'})
         else:
             return jsonify({'status': 'fail', 'message': '이미 존재하는 아이디입니다.'})
-    
+
     except subprocess.CalledProcessError as e:
         logging.error(f"회원가입 중 C 프로그램 오류: {e.output}")
         return jsonify({'status': 'fail', 'message': f'회원가입 중 오류가 발생했습니다: {e.output}'})
@@ -77,11 +80,14 @@ def login():
         if not os.path.isfile(db_manager_path):
             logging.error(f"C 바이너리 파일을 찾을 수 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 파일을 찾을 수 없습니다.'}), 500
-        
+
         # C 바이너리 파일 실행 권한 확인
         if not os.access(db_manager_path, os.X_OK):
             logging.error(f"C 바이너리에 실행 권한이 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 권한이 없습니다.'}), 500
+
+        # C 프로그램 실행 전 환경 변수 확인
+        logging.info(f"C 바이너리 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='{password}'")
 
         # C 프로그램 실행
         result = subprocess.check_output([db_manager_path, 'login', username, password], text=True).strip()
@@ -92,7 +98,7 @@ def login():
             return jsonify({'status': 'success', 'redirect': url_for('calendar')})
         else:
             return jsonify({'status': 'fail', 'message': '아이디 또는 비밀번호가 잘못되었습니다.'})
-    
+
     except subprocess.CalledProcessError as e:
         logging.error(f"로그인 중 C 프로그램 오류: {e.output}")
         return jsonify({'status': 'fail', 'message': f'로그인 중 오류가 발생했습니다: {e.output}'})
@@ -151,7 +157,7 @@ def save_timeline():
         else:
             error_output = result.stderr.strip() or result.stdout.strip()
             return jsonify({'status': 'fail', 'message': f'이벤트 저장에 실패했습니다: {error_output}'})
-    
+
     except Exception as e:
         logging.error(f"이벤트 저장 중 예외 발생: {str(e)}")
         return jsonify({'status': 'fail', 'message': f'이벤트 저장 중 오류가 발생했습니다: {str(e)}'})
@@ -193,7 +199,7 @@ def load_timeline():
         else:
             error_output = result.stderr.strip() or result.stdout.strip()
             return jsonify({'status': 'fail', 'message': f'이벤트 로드에 실패했습니다: {error_output}'})
-    
+
     except Exception as e:
         logging.error(f"이벤트 로드 중 예외 발생: {str(e)}")
         return jsonify({'status': 'fail', 'message': f'이벤트 로드 중 오류가 발생했습니다: {str(e)}'})
