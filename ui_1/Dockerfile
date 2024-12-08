@@ -29,5 +29,10 @@ COPY . /app/
 RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir -r requirements.txt
 
-# CMD를 python 모듈 형태로 실행하여 gunicorn 실행
-CMD ["python", "-m", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+# C 바이너리에 실행 권한 부여
+RUN chmod +x /app/db_manager/db_manager && \
+    chmod +x /app/transit/get_coordinates && \
+    chmod +x /app/transit/get_route_info
+
+# CMD를 gunicorn 실행 명령어로 설정
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
