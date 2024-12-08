@@ -10,6 +10,7 @@ RUN apt-get update && \
         libcurl4-openssl-dev \
         libcjson-dev \
         pkg-config \
+        ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # cJSON 빌드 및 설치
@@ -41,6 +42,16 @@ RUN cd transit && \
 
 # 실행 권한 부여
 RUN chmod +x db_manager/db_manager transit/get_coordinates transit/get_route_info
+
+# 파일 권한 확인 (빌드 로그에서 확인 가능)
+RUN ls -l db_manager/db_manager transit/get_coordinates transit/get_route_info
+
+# (옵션) www-data 사용자 생성 및 파일 소유자 변경
+# RUN adduser --disabled-password --gecos '' www-data && \
+#     chown -R www-data:www-data /app
+
+# (옵션) 애플리케이션을 www-data 사용자로 실행
+# USER www-data
 
 # CMD를 gunicorn 실행 명령어로 설정
 CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
