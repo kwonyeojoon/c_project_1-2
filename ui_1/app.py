@@ -5,7 +5,13 @@ import subprocess
 import logging
 
 # 로깅 설정
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s:%(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s:%(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 load_dotenv()
 
@@ -22,6 +28,10 @@ DB_DIR = os.path.join(PROJECT_ROOT, "ui_1", "db_manager")
 db_manager_path = os.path.abspath(os.path.join(DB_DIR, "db_manager"))
 get_coordinates_path = os.path.abspath(os.path.join(TRANSIT_DIR, "get_coordinates"))
 get_route_info_path = os.path.abspath(os.path.join(TRANSIT_DIR, "get_route_info"))
+
+logging.info(f"C 프로그램 경로 설정: db_manager_path='{db_manager_path}'")
+logging.info(f"C 프로그램 경로 설정: get_coordinates_path='{get_coordinates_path}'")
+logging.info(f"C 프로그램 경로 설정: get_route_info_path='{get_route_info_path}'")
 
 # 홈 페이지 라우트
 @app.route('/')
@@ -48,8 +58,8 @@ def register():
             logging.error(f"C 바이너리에 실행 권한이 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 권한이 없습니다.'}), 500
 
-        # C 프로그램 실행 전 환경 변수 확인
-        logging.info(f"C 바이너리 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='{password}'")
+        # C 프로그램 실행 전 상태 로그
+        logging.info(f"C 프로그램 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='******'")
 
         # C 프로그램 실행
         result = subprocess.check_output([db_manager_path, 'register', username, password], text=True).strip()
@@ -61,8 +71,8 @@ def register():
             return jsonify({'status': 'fail', 'message': '이미 존재하는 아이디입니다.'})
 
     except subprocess.CalledProcessError as e:
-        logging.error(f"회원가입 중 C 프로그램 오류: {e.output}")
-        return jsonify({'status': 'fail', 'message': f'회원가입 중 오류가 발생했습니다: {e.output}'})
+        logging.error(f"회원가입 중 C 프로그램 오류: Return Code={e.returncode}, Output='{e.output.strip()}'")
+        return jsonify({'status': 'fail', 'message': f'회원가입 중 오류가 발생했습니다: {e.output.strip()}'})
     except Exception as e:
         logging.error(f"회원가입 중 예외 발생: {str(e)}")
         return jsonify({'status': 'fail', 'message': f'회원가입 중 예상치 못한 오류가 발생했습니다: {str(e)}'})
@@ -86,8 +96,8 @@ def login():
             logging.error(f"C 바이너리에 실행 권한이 없습니다: {db_manager_path}")
             return jsonify({'status': 'fail', 'message': '서버 오류: 실행 권한이 없습니다.'}), 500
 
-        # C 프로그램 실행 전 환경 변수 확인
-        logging.info(f"C 바이너리 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='{password}'")
+        # C 프로그램 실행 전 상태 로그
+        logging.info(f"C 프로그램 실행 준비: {db_manager_path}, 사용자명='{username}', 비밀번호='******'")
 
         # C 프로그램 실행
         result = subprocess.check_output([db_manager_path, 'login', username, password], text=True).strip()
@@ -100,8 +110,8 @@ def login():
             return jsonify({'status': 'fail', 'message': '아이디 또는 비밀번호가 잘못되었습니다.'})
 
     except subprocess.CalledProcessError as e:
-        logging.error(f"로그인 중 C 프로그램 오류: {e.output}")
-        return jsonify({'status': 'fail', 'message': f'로그인 중 오류가 발생했습니다: {e.output}'})
+        logging.error(f"로그인 중 C 프로그램 오류: Return Code={e.returncode}, Output='{e.output.strip()}'")
+        return jsonify({'status': 'fail', 'message': f'로그인 중 오류가 발생했습니다: {e.output.strip()}'})
     except Exception as e:
         logging.error(f"로그인 중 예외 발생: {str(e)}")
         return jsonify({'status': 'fail', 'message': f'로그인 중 예상치 못한 오류가 발생했습니다: {str(e)}'})
@@ -144,6 +154,8 @@ def save_timeline():
             trans_time
         ]
 
+        logging.info(f"이벤트 저장 명령어 실행: {' '.join(cmd)}")
+
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -156,6 +168,7 @@ def save_timeline():
             return jsonify({'status': 'success'})
         else:
             error_output = result.stderr.strip() or result.stdout.strip()
+            logging.error(f"이벤트 저장 실패: {error_output}")
             return jsonify({'status': 'fail', 'message': f'이벤트 저장에 실패했습니다: {error_output}'})
 
     except Exception as e:
@@ -177,6 +190,8 @@ def load_timeline():
 
     try:
         cmd = [db_manager_path, 'load_events', username, date]
+        logging.info(f"이벤트 로드 명령어 실행: {' '.join(cmd)}")
+
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         logging.info(f"이벤트 로드 결과: Return Code={result.returncode}, Stdout='{result.stdout.strip()}', Stderr='{result.stderr.strip()}'")
@@ -192,12 +207,20 @@ def load_timeline():
                         if len(fields) == 3:
                             title, start_time, end_time = fields
                             is_transit = "이동시간" in title  # 이동시간 여부 확인
-                            events.append({'title': title, 'start_time': start_time, 'end_time': end_time, 'is_transit': is_transit})
+                            events.append({
+                                'title': title,
+                                'start_time': start_time,
+                                'end_time': end_time,
+                                'is_transit': is_transit
+                            })
+                logging.info(f"로드된 이벤트 수: {len(events)}")
                 return jsonify({'status': 'success', 'events': events})
             else:
+                logging.error("이벤트 로드 실패: C 프로그램에서 'success' 응답을 받지 못했습니다.")
                 return jsonify({'status': 'fail', 'message': '이벤트 로드에 실패했습니다.'})
         else:
             error_output = result.stderr.strip() or result.stdout.strip()
+            logging.error(f"이벤트 로드 실패: {error_output}")
             return jsonify({'status': 'fail', 'message': f'이벤트 로드에 실패했습니다: {error_output}'})
 
     except Exception as e:
@@ -207,14 +230,16 @@ def load_timeline():
 def get_coordinates(departure, destination):
     os.chdir(TRANSIT_DIR)
     try:
+        logging.info(f"get_coordinates 실행: departure='{departure}', destination='{destination}'")
         result = subprocess.check_output(['./get_coordinates', departure, destination], text=True)
         lines = result.strip().splitlines()
         if len(lines) < 2:
             raise ValueError("C 프로그램 출력이 예상보다 적습니다.")
+        logging.info(f"get_coordinates 결과: start_coords='{lines[0]}', end_coords='{lines[1]}'")
         return {'success': True, 'start_coords': lines[0], 'end_coords': lines[1]}
     except subprocess.CalledProcessError as e:
-        logging.error(f"get_coordinates 실행 중 오류: {e}")
-        return {'success': False, 'error': f"C 프로그램 실행 실패: {e}"}
+        logging.error(f"get_coordinates 실행 중 오류: Return Code={e.returncode}, Output='{e.output.strip()}'")
+        return {'success': False, 'error': f"C 프로그램 실행 실패: {e.output.strip()}"}
     except ValueError as ve:
         logging.error(f"get_coordinates 실행 결과 오류: {ve}")
         return {'success': False, 'error': str(ve)}
@@ -222,21 +247,23 @@ def get_coordinates(departure, destination):
 # 대중교통 시간 가져오기
 def get_transit_time(start_coords, end_coords, hour, minute):
     try:
+        logging.info(f"get_transit_time 실행: start_coords='{start_coords}', end_coords='{end_coords}', hour='{hour}', minute='{minute}'")
         result = subprocess.check_output(['python3', 'get_transit_time.py', start_coords, end_coords, hour, minute], text=True)
-        logging.info(f"get_transit_time 결과: {result.strip()}")
+        logging.info(f"get_transit_time 결과: '{result.strip()}'")
         return {'success': True, 'time': result.strip()}
     except subprocess.CalledProcessError as e:
-        logging.error(f"get_transit_time 실행 중 오류: {e}")
+        logging.error(f"get_transit_time 실행 중 오류: Return Code={e.returncode}, Output='{e.output.strip()}'")
         return {'success': False, 'error': str(e)}
 
 # 자가용 시간 가져오기
 def get_car_duration(start_coords, end_coords):
     try:
+        logging.info(f"get_car_duration 실행: start_coords='{start_coords}', end_coords='{end_coords}'")
         result = subprocess.check_output(['./get_route_info', start_coords, end_coords], text=True)
-        logging.info(f"get_car_duration 결과: {result.strip()}")
+        logging.info(f"get_car_duration 결과: '{result.strip()}'")
         return {'success': True, 'time': result.strip()}
     except subprocess.CalledProcessError as e:
-        logging.error(f"get_route_info 실행 중 오류: {e}")
+        logging.error(f"get_route_info 실행 중 오류: Return Code={e.returncode}, Output='{e.output.strip()}'")
         return {'success': False, 'error': str(e)}
 
 @app.route('/get-route-time', methods=['POST'])
