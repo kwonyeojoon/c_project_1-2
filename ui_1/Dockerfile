@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # 필수 패키지 설치
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential \   # 빌드 필수 도구들 (gcc, make 등)
+        build-essential \  # 빌드 필수 도구들 (gcc, make 등)
         curl \
         git \
         libcurl4-openssl-dev \
