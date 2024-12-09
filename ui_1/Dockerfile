@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # 필수 패키지 설치
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential \  # 빌드 필수 도구들 (gcc, make 등)
+        build-essential \   # 빌드 필수 도구들 (gcc, make 등)
         curl \
         git \
         libcurl4-openssl-dev \
@@ -29,5 +29,5 @@ WORKDIR /app
 RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir -r requirements.txt
 
-# CMD를 python 모듈 형태로 실행하여 gunicorn 실행
-CMD ["python", "-m", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+# Flask 앱을 바로 실행 (app.py)
+CMD ["python", "app.py"]
