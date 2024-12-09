@@ -10,7 +10,8 @@ RUN apt-get update && \
         libcurl4-openssl-dev \
         libcjson-dev \
         pkg-config \
-        ca-certificates \
+        sqlite3 \
+        libsqlite3-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # cJSON 빌드 및 설치
@@ -33,12 +34,12 @@ RUN python -m pip install --upgrade pip && \
 # C 바이너리 컴파일
 # db_manager 컴파일
 RUN cd db_manager && \
-    gcc -o db_manager db_manager.c
+    gcc -o db_manager db_manager.c -lsqlite3
 
 # transit 프로그램 컴파일
 RUN cd transit && \
-    gcc -o get_coordinates get_coordinates.c && \
-    gcc -o get_route_info get_route_info.c
+    gcc -o get_coordinates get_coordinates.c -lsqlite3 && \
+    gcc -o get_route_info get_route_info.c -lsqlite3
 
 # 실행 권한 부여
 RUN chmod +x db_manager/db_manager transit/get_coordinates transit/get_route_info
